@@ -65,9 +65,6 @@ typedef enum RATreeViewRowAnimation {
 
 - (NSInteger)numberOfRowsInSection:(NSInteger)section;
 
-- (NSString*)treeView:(RATreeView*)treeView titleForHeaderInSection:(NSInteger)section;
-
-- (NSString*)treeView:(RATreeView*)treeView titleForFooterInSection:(NSInteger)section;
 
 ///------------------------------------------------
 /// Configuring a Tree View
@@ -107,6 +104,10 @@ typedef enum RATreeViewRowAnimation {
 - (id)treeView:(RATreeView *)treeView child:(NSInteger)index ofItem:(id)item section:(NSInteger)section;
 
 @optional
+
+- (NSString*)treeView:(RATreeView*)treeView titleForHeaderInSection:(NSInteger)section;
+
+- (NSString*)treeView:(RATreeView*)treeView titleForFooterInSection:(NSInteger)section;
 
 ///------------------------------------------------
 /// Inserting or Deleting Tree Rows
