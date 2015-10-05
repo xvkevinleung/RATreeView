@@ -35,7 +35,7 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-  if (section + 1 < self.treeNodeCollectionControllers.count) {
+  if (section == self.treeNodeCollectionControllers.count) {
     [self setupTreeStructure:section];
   }
   return self.treeNodeCollectionControllers[section].numberOfVisibleRowsForItems;
