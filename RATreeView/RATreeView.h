@@ -63,8 +63,6 @@ typedef enum RATreeViewRowAnimation {
 
 - (NSInteger)numberOfSections;
 
-- (NSInteger)numberOfRowsInSection:(NSInteger)section;
-
 
 ///------------------------------------------------
 /// Configuring a Tree View

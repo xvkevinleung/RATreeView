@@ -146,11 +146,6 @@
   return [self.dataSource numberOfSections];
 }
 
-- (NSInteger)numberOfRowsInSection:(NSInteger)section
-{
-  return [self.dataSource numberOfRowsInSection:section];
-}
-
 - (RATreeViewStyle)style
 {
   UITableViewStyle tableViewStyle = self.tableView.style;

@@ -104,11 +104,6 @@
   return self.data.count;
 }
 
-- (NSInteger)numberOfRowsInSection:(NSInteger)section
-{
-  return [self.data[section] count];
-}
-
 - (CGFloat)treeView:(RATreeView *)treeView heightForRowForItem:(id)item section:(NSInteger)section
 {
   return 44;
