@@ -33,58 +33,67 @@
 
 @implementation RATreeView (Private)
 
-- (void)setupTreeStructure
+- (void)setupTreeStructure:(NSInteger)section
 {
-  self.treeNodeCollectionController = [[RATreeNodeCollectionController alloc] init];
-  self.treeNodeCollectionController.dataSource = self;
+  RATreeNodeCollectionController* treeNodeCollectionController = [[RATreeNodeCollectionController alloc] initWithSection:section];
+  [self addTreeNodeCollectionControllersObject:treeNodeCollectionController];
+  treeNodeCollectionController.dataSource = self;
   self.batchChanges = [[RABatchChanges alloc] init];
 }
 
-- (NSArray *)childrenForItem:(id)item
-{
-  NSParameterAssert(item);
-  
-  NSMutableArray *children = [NSMutableArray array];
-  NSInteger numberOfChildren = [self.dataSource treeView:self numberOfChildrenOfItem:item];
-  
-  for (int i = 0; i < numberOfChildren; i++) {
-    [children addObject:[self.dataSource treeView:self child:i ofItem:item]];
-  }
-  
-  return [NSArray arrayWithArray:children];
-}
+//- (NSArray *)childrenForItem:(id)item
+//{
+//  NSParameterAssert(item);
+//  
+//  NSMutableArray *children = [NSMutableArray array];
+//  NSInteger numberOfChildren = [self.dataSource treeView:self numberOfChildrenOfItem:item section:section];
+//  
+//  for (int i = 0; i < numberOfChildren; i++) {
+//    [children addObject:[self.dataSource treeView:self child:i ofItem:item]];
+//  }
+//
+//  return [NSArray arrayWithArray:children];
+//}
 
 - (RATreeNode *)treeNodeForIndexPath:(NSIndexPath *)indexPath
 {
-  NSParameterAssert(indexPath.section == 0);
-  return [self.treeNodeCollectionController treeNodeForIndex:indexPath.row];
+  RATreeNodeCollectionController* treeNodeCollectionController = self.treeNodeCollectionControllers[indexPath.section];
+  return [treeNodeCollectionController treeNodeForIndex:indexPath.row];
 }
 
-- (NSIndexPath *)indexPathForItem:(id)item
+- (NSIndexPath *)indexPathForItem:(id)item section:(NSInteger)section
 {
-  return [NSIndexPath indexPathForRow:[self.treeNodeCollectionController indexForItem:item] inSection:0];
+  RATreeNodeCollectionController* controller = self.treeNodeCollectionControllers[section];
+  NSInteger index = [controller indexForItem:item];
+
+  if (index != NSNotFound) {
+    return [NSIndexPath indexPathForRow:index inSection:section];
+  }
+
+  return nil;
 }
 
 
 #pragma mark Collapsing and Expanding Rows
 
-- (void)collapseCellForTreeNode:(RATreeNode *)treeNode
+- (void)collapseCellForTreeNode:(RATreeNode *)treeNode section:(NSInteger)section
 {
-  [self collapseCellForTreeNode:treeNode collapseChildren:self.collapsesChildRowsWhenRowCollapses withRowAnimation:self.rowsCollapsingAnimation];
+  [self collapseCellForTreeNode:treeNode section:(NSInteger)section collapseChildren:self.collapsesChildRowsWhenRowCollapses withRowAnimation:self.rowsCollapsingAnimation];
 }
 
-- (void)collapseCellForTreeNode:(RATreeNode *)treeNode collapseChildren:(BOOL)collapseChildren withRowAnimation:(RATreeViewRowAnimation)rowAnimation
+- (void)collapseCellForTreeNode:(RATreeNode *)treeNode section:(NSInteger)section collapseChildren:(BOOL)collapseChildren withRowAnimation:(RATreeViewRowAnimation)rowAnimation
 {
   [self.tableView beginUpdates];
   [self.batchChanges beginUpdates];
-  
-  NSInteger index = [self.treeNodeCollectionController lastVisibleDescendantIndexForItem:treeNode.item];
+
+  RATreeNodeCollectionController* collectionController = self.treeNodeCollectionControllers[section];
+  NSInteger index = [collectionController lastVisibleDescendantIndexForItem:treeNode.item];
   
   __weak typeof(self) weakSelf = self;
   [self.batchChanges collapseItemWithBlock:^{
     UITableViewRowAnimation tableViewRowAnimation = [RATreeView tableViewRowAnimationForTreeViewRowAnimation:rowAnimation];
-    [weakSelf.treeNodeCollectionController collapseRowForItem:treeNode.item collapseChildren:collapseChildren updates:^(NSIndexSet *deletions) {
-      [weakSelf.tableView deleteRowsAtIndexPaths:IndexesToIndexPaths(deletions) withRowAnimation:tableViewRowAnimation];
+    [collectionController collapseRowForItem:treeNode.item collapseChildren:collapseChildren updates:^(NSIndexSet *deletions) {
+      [weakSelf.tableView deleteRowsAtIndexPaths:IndexesToIndexPaths(deletions, section) withRowAnimation:tableViewRowAnimation];
     }];
   } lastIndex:index];
   
@@ -92,22 +101,23 @@
   [self.tableView endUpdates];
 }
 
-- (void)expandCellForTreeNode:(RATreeNode *)treeNode
+- (void)expandCellForTreeNode:(RATreeNode *)treeNode section:(NSInteger)section
 {
-  [self expandCellForTreeNode:treeNode expandChildren:self.expandsChildRowsWhenRowExpands withRowAnimation:self.rowsExpandingAnimation];
+  [self expandCellForTreeNode:treeNode section:section expandChildren:self.expandsChildRowsWhenRowExpands withRowAnimation:self.rowsExpandingAnimation];
 }
 
-- (void)expandCellForTreeNode:(RATreeNode *)treeNode expandChildren:(BOOL)expandChildren withRowAnimation:(RATreeViewRowAnimation)rowAnimation
+- (void)expandCellForTreeNode:(RATreeNode *)treeNode section:(NSInteger)section expandChildren:(BOOL)expandChildren withRowAnimation:(RATreeViewRowAnimation)rowAnimation
 {
   [self.tableView beginUpdates];
   [self.batchChanges beginUpdates];
-  
-  NSInteger index = [self.treeNodeCollectionController indexForItem:treeNode.item];
+
+  RATreeNodeCollectionController* collectionController = self.treeNodeCollectionControllers[section];
+  NSInteger index = [collectionController indexForItem:treeNode.item];
   __weak typeof(self) weakSelf = self;
   [self.batchChanges expandItemWithBlock:^{
     UITableViewRowAnimation tableViewRowAnimation = [RATreeView tableViewRowAnimationForTreeViewRowAnimation:rowAnimation];
-    [weakSelf.treeNodeCollectionController expandRowForItem:treeNode.item expandChildren:expandChildren updates:^(NSIndexSet *insertions) {
-      [weakSelf.tableView insertRowsAtIndexPaths:IndexesToIndexPaths(insertions) withRowAnimation:tableViewRowAnimation];
+    [collectionController expandRowForItem:treeNode.item expandChildren:expandChildren updates:^(NSIndexSet *insertions) {
+      [weakSelf.tableView insertRowsAtIndexPaths:IndexesToIndexPaths(insertions, section) withRowAnimation:tableViewRowAnimation];
     }];
   } atIndex:index];
   
@@ -116,9 +126,10 @@
   [self.tableView endUpdates];
 }
 
-- (void)insertItemAtIndex:(NSInteger)index inParent:(id)parent withAnimation:(RATreeViewRowAnimation)animation
+- (void)insertItemAtIndex:(NSInteger)index section:(NSInteger)section inParent:(id)parent withAnimation:(RATreeViewRowAnimation)animation
 {
-  NSInteger idx = [self.treeNodeCollectionController indexForItem:parent];
+  RATreeNodeCollectionController* collectionController = self.treeNodeCollectionControllers[section];
+  NSInteger idx = [collectionController indexForItem:parent];
   if (idx == NSNotFound) {
     return;
   }
@@ -126,9 +137,9 @@
   
   __weak typeof(self) weakSelf = self;
   [self.batchChanges insertItemWithBlock:^{
-    [weakSelf.treeNodeCollectionController insertItemsAtIndexes:[NSIndexSet indexSetWithIndex:index] inParent:parent];
+    [collectionController insertItemsAtIndexes:[NSIndexSet indexSetWithIndex:index] inParent:parent];
     
-    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:idx inSection:0];
+    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:idx inSection:section];
     UITableViewRowAnimation tableViewRowAnimation = [RATreeView tableViewRowAnimationForTreeViewRowAnimation:animation];
     [weakSelf.tableView insertRowsAtIndexPaths:@[indexPath] withRowAnimation:tableViewRowAnimation];
     
@@ -137,10 +148,11 @@
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
-- (void)moveItemAtIndex:(NSInteger)index inParent:(id)parent toIndex:(NSInteger)newIndex inParent:(id)newParent
+- (void)moveItemAtIndex:(NSInteger)index section:(NSInteger)section inParent:(id)parent toIndex:(NSInteger)newIndex inParent:(id)newParent
 #pragma clang diagnostic pop
 {
-  NSInteger idx = [self.treeNodeCollectionController indexForItem:parent];
+  RATreeNodeCollectionController* collectionController = self.treeNodeCollectionControllers[section];
+  NSInteger idx = [collectionController indexForItem:parent];
   if (idx == NSNotFound) {
     return;
   }
@@ -148,9 +160,9 @@
   idx += index + 1;
   __weak typeof(self) weakSelf = self;
   [self.batchChanges insertItemWithBlock:^{
-    [weakSelf.treeNodeCollectionController moveItemAtIndex:index inParent:parent toIndex:newIndex inParent:newParent updates:^(NSIndexSet *deletions, NSIndexSet *additions) {
-      NSArray *deletionsArray = IndexesToIndexPaths(deletions);
-      NSArray *additionsArray = IndexesToIndexPaths(additions);
+    [collectionController moveItemAtIndex:index inParent:parent toIndex:newIndex inParent:newParent updates:^(NSIndexSet *deletions, NSIndexSet *additions) {
+      NSArray *deletionsArray = IndexesToIndexPaths(deletions, section);
+      NSArray *additionsArray = IndexesToIndexPaths(additions, section);
     
       NSInteger i = 0;
       for (NSIndexPath *deletedIndexPath in deletionsArray) {
@@ -161,30 +173,31 @@
   } atIndex:idx];
 }
 
-- (void)removeItemAtIndex:(NSInteger)index inParent:(id)parent withAnimation:(RATreeViewRowAnimation)animation
+- (void)removeItemAtIndex:(NSInteger)index section:(NSInteger)section inParent:(id)parent withAnimation:(RATreeViewRowAnimation)animation
 {
-  id child = [self.treeNodeCollectionController childInParent:parent atIndex:index];
-  NSInteger idx = [self.treeNodeCollectionController lastVisibleDescendantIndexForItem:child];
+  RATreeNodeCollectionController* collectionController = self.treeNodeCollectionControllers[section];
+  id child = [collectionController childInParent:parent atIndex:index];
+  NSInteger idx = [collectionController lastVisibleDescendantIndexForItem:child];
   if (idx == NSNotFound) {
     return;
   }
   
   __weak typeof(self) weakSelf = self;
   [self.batchChanges insertItemWithBlock:^{
-    [weakSelf.treeNodeCollectionController removeItemsAtIndexes:[NSIndexSet indexSetWithIndex:index] inParent:parent updates:^(NSIndexSet *removedIndexes) {
+    [collectionController removeItemsAtIndexes:[NSIndexSet indexSetWithIndex:index] inParent:parent updates:^(NSIndexSet *removedIndexes) {
       UITableViewRowAnimation tableViewRowAnimation = [RATreeView tableViewRowAnimationForTreeViewRowAnimation:animation];
-      [weakSelf.tableView deleteRowsAtIndexPaths:IndexesToIndexPaths(removedIndexes) withRowAnimation:tableViewRowAnimation];
+      [weakSelf.tableView deleteRowsAtIndexPaths:IndexesToIndexPaths(removedIndexes, section) withRowAnimation:tableViewRowAnimation];
     }];
   } atIndex:idx];
 }
 
 #pragma mark -
 
-static NSArray * IndexesToIndexPaths(NSIndexSet *indexes)
+static NSArray* IndexesToIndexPaths(NSIndexSet *indexes, NSInteger section)
 {
   NSMutableArray *indexPaths = [NSMutableArray array];
   [indexes enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
-    [indexPaths addObject:[NSIndexPath indexPathForRow:idx inSection:0]];
+    [indexPaths addObject:[NSIndexPath indexPathForRow:idx inSection:section]];
   }];
   return [indexPaths copy];
 }

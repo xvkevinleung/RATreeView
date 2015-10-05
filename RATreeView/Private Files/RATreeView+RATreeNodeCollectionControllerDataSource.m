@@ -22,14 +22,14 @@
 
 @implementation RATreeView (RATreeNodeCollectionControllerDataSource)
 
-- (NSInteger)treeNodeCollectionController:(RATreeNodeCollectionController *)controller numberOfChildrenForItem:(id)item
+- (NSInteger)treeNodeCollectionController:(RATreeNodeCollectionController *)controller numberOfChildrenForItem:(id)item section:(NSInteger)section
 {
-  return [self.dataSource treeView:self numberOfChildrenOfItem:item];
+  return [self.dataSource treeView:self numberOfChildrenOfItem:item section:section];
 }
 
-- (id)treeNodeCollectionController:(RATreeNodeCollectionController *)controller child:(NSInteger)childIndex ofItem:(id)item
+- (id)treeNodeCollectionController:(RATreeNodeCollectionController *)controller child:(NSInteger)childIndex ofItem:(id)item section:(NSInteger)section
 {
-  return [self.dataSource treeView:self child:childIndex ofItem:item];
+  return [self.dataSource treeView:self child:childIndex ofItem:item section:section];
 }
 
 @end

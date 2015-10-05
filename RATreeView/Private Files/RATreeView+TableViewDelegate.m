@@ -32,38 +32,70 @@
 
 #pragma mark - Configuring Rows for the Table View
 
+- (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
+{
+  if ([self.delegate respondsToSelector:@selector(treeView:viewForHeaderInSection:)]) {
+    return [self.delegate treeView:self viewForHeaderInSection:section];
+  }
+  return nil;
+}
+
+- (UIView *)tableView:(UITableView *)tableView viewForFooterInSection:(NSInteger)section
+{
+  if ([self.delegate respondsToSelector:@selector(treeView:viewForFooterInSection:)]) {
+    return [self.delegate treeView:self viewForFooterInSection:section];
+  }
+  return nil;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
+{
+  if ([self.delegate respondsToSelector:@selector(treeView:heightForHeaderInSection:)]) {
+    return [self.delegate treeView:self heightForHeaderInSection:section];
+  }
+  return 30;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section
+{
+  if ([self.delegate respondsToSelector:@selector(treeView:heightForFooterInSection:)]) {
+    return [self.delegate treeView:self heightForHeaderInSection:section];
+  }
+  return 0;
+}
+
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-  if ([self.delegate respondsToSelector:@selector(treeView:heightForRowForItem:)]) {
+  if ([self.delegate respondsToSelector:@selector(treeView:heightForRowForItem:section:)]) {
     RATreeNode *treeNode = [self treeNodeForIndexPath:indexPath];
-    return [self.delegate treeView:self heightForRowForItem:treeNode.item];
+    return [self.delegate treeView:self heightForRowForItem:treeNode.item section:indexPath.section];
   }
   return self.tableView.rowHeight;
 }
 
 - (CGFloat)tableView:(UITableView *)tableView estimatedHeightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-  if ([self.delegate respondsToSelector:@selector(treeView:estimatedHeightForRowForItem:)]) {
+  if ([self.delegate respondsToSelector:@selector(treeView:estimatedHeightForRowForItem:section:)]) {
     RATreeNode *treeNode = [self treeNodeForIndexPath:indexPath];
-    return [self.delegate treeView:self estimatedHeightForRowForItem:treeNode.item];
+    return [self.delegate treeView:self estimatedHeightForRowForItem:treeNode.item section:indexPath.section];
   }
   return UITableViewAutomaticDimension;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView indentationLevelForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-  if ([self.delegate respondsToSelector:@selector(treeView:indentationLevelForRowForItem:)]) {
+  if ([self.delegate respondsToSelector:@selector(treeView:indentationLevelForRowForItem:section:)]) {
     RATreeNode *treeNode = [self treeNodeForIndexPath:indexPath];
-    return [self.delegate treeView:self indentationLevelForRowForItem:treeNode.item];
+    return [self.delegate treeView:self indentationLevelForRowForItem:treeNode.item section:indexPath.section];
   }
   return 0;
 }
 
 - (void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath
 {
-  if ([self.delegate respondsToSelector:@selector(treeView:willDisplayCell:forItem:)]) {
+  if ([self.delegate respondsToSelector:@selector(treeView:willDisplayCell:forItem:section:)]) {
     RATreeNode *treeNode = [self treeNodeForIndexPath:indexPath];
-    [self.delegate treeView:self willDisplayCell:cell forItem:treeNode.item];
+    [self.delegate treeView:self willDisplayCell:cell forItem:treeNode.item section:indexPath.section];
   }
 }
 
@@ -72,9 +104,9 @@
 
 - (void)tableView:(UITableView *)tableView accessoryButtonTappedForRowWithIndexPath:(NSIndexPath *)indexPath
 {
-  if ([self.delegate respondsToSelector:@selector(treeView:accessoryButtonTappedForRowForItem:)]) {
+  if ([self.delegate respondsToSelector:@selector(treeView:accessoryButtonTappedForRowForItem:section:)]) {
     RATreeNode *treeNode = [self treeNodeForIndexPath:indexPath];
-    [self.delegate treeView:self accessoryButtonTappedForRowForItem:treeNode.item];
+    [self.delegate treeView:self accessoryButtonTappedForRowForItem:treeNode.item section:indexPath.section];
   }
 }
 
@@ -83,11 +115,11 @@
 
 - (NSIndexPath *)tableView:(UITableView *)tableView willSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-  if ([self.delegate respondsToSelector:@selector(treeView:willSelectRowForItem:)]) {
+  if ([self.delegate respondsToSelector:@selector(treeView:willSelectRowForItem:section:)]) {
     RATreeNode *treeNode = [self treeNodeForIndexPath:indexPath];
-    id item = [self.delegate treeView:self willSelectRowForItem:treeNode.item];
+    id item = [self.delegate treeView:self willSelectRowForItem:treeNode.item section:indexPath.section];
     if (item) {
-      NSIndexPath *newIndexPath = [self indexPathForItem:item];
+      NSIndexPath *newIndexPath = [self indexPathForItem:item section:indexPath.section];
       return (newIndexPath.row == NSNotFound) ? indexPath : newIndexPath;
     } else {
       return nil;
@@ -99,35 +131,35 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
   RATreeNode *treeNode = [self treeNodeForIndexPath:indexPath];
-  if ([self.delegate respondsToSelector:@selector(treeView:didSelectRowForItem:)]) {
-    [self.delegate treeView:self didSelectRowForItem:treeNode.item];
+  if ([self.delegate respondsToSelector:@selector(treeView:didSelectRowForItem:section:)]) {
+    [self.delegate treeView:self didSelectRowForItem:treeNode.item section:indexPath.section];
   }
   
   if (treeNode.expanded) {
-    if ([self.delegate respondsToSelector:@selector(treeView:shouldCollapaseRowForItem:)]) {
-      if ([self.delegate treeView:self shouldCollapaseRowForItem:treeNode.item]) {
-        [self collapseCellForTreeNode:treeNode informDelegate:YES];
+    if ([self.delegate respondsToSelector:@selector(treeView:shouldCollapaseRowForItem:section:)]) {
+      if ([self.delegate treeView:self shouldCollapaseRowForItem:treeNode.item section:indexPath.section]) {
+        [self collapseCellForTreeNode:treeNode section:indexPath.section informDelegate:YES];
       }
     } else {
-      [self collapseCellForTreeNode:treeNode informDelegate:YES];
+      [self collapseCellForTreeNode:treeNode section:indexPath.section informDelegate:YES];
     }
   } else {
-    if ([self.delegate respondsToSelector:@selector(treeView:shouldExpandRowForItem:)]) {
-      if ([self.delegate treeView:self shouldExpandRowForItem:treeNode.item]) {
-        [self expandCellForTreeNode:treeNode informDelegate:YES];
+    if ([self.delegate respondsToSelector:@selector(treeView:shouldExpandRowForItem:section:)]) {
+      if ([self.delegate treeView:self shouldExpandRowForItem:treeNode.item section:indexPath.section]) {
+        [self expandCellForTreeNode:treeNode section:indexPath.section informDelegate:YES];
       }
     } else {
-      [self expandCellForTreeNode:treeNode informDelegate:YES];
+      [self expandCellForTreeNode:treeNode section:indexPath.section informDelegate:YES];
     }
   }
 }
 
 - (NSIndexPath *)tableView:(UITableView *)tableView willDeselectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-  if ([self.delegate respondsToSelector:@selector(treeView:willDeselectRowForItem:)]) {
+  if ([self.delegate respondsToSelector:@selector(treeView:willDeselectRowForItem:section:)]) {
     RATreeNode *treeNode = [self treeNodeForIndexPath:indexPath];
-    id item = [self.delegate treeView:self willDeselectRowForItem:treeNode.item];
-    NSIndexPath *delegateIndexPath = [self indexPathForItem:item];
+    id item = [self.delegate treeView:self willDeselectRowForItem:treeNode.item section:indexPath.section];
+    NSIndexPath *delegateIndexPath = [self indexPathForItem:item section:indexPath.section];
     return delegateIndexPath.row == NSNotFound ? indexPath : delegateIndexPath;
   } else {
     return indexPath;
@@ -136,9 +168,9 @@
 
 - (void)tableView:(UITableView *)tableView didDeselectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-  if ([self.delegate respondsToSelector:@selector(treeView:didDeselectRowForItem:)]) {
+  if ([self.delegate respondsToSelector:@selector(treeView:didDeselectRowForItem:section:)]) {
     RATreeNode *treeNode = [self treeNodeForIndexPath:indexPath];
-    [self.delegate treeView:self didDeselectRowForItem:treeNode.item];
+    [self.delegate treeView:self didDeselectRowForItem:treeNode.item section:indexPath.section];
   }
 }
 
@@ -268,43 +300,43 @@
 
 #pragma mark - Private Helpers
 
-- (void)collapseCellForTreeNode:(RATreeNode *)treeNode informDelegate:(BOOL)informDelegate
+- (void)collapseCellForTreeNode:(RATreeNode *)treeNode section:(NSInteger)section informDelegate:(BOOL)informDelegate
 {
   if (informDelegate) {
-    if ([self.delegate respondsToSelector:@selector(treeView:willCollapseRowForItem:)]) {
-      [self.delegate treeView:self willCollapseRowForItem:treeNode.item];
+    if ([self.delegate respondsToSelector:@selector(treeView:willCollapseRowForItem:section:)]) {
+      [self.delegate treeView:self willCollapseRowForItem:treeNode.item section:section];
     }
   }
   
   [CATransaction begin];
   [CATransaction setCompletionBlock:^{
-    if ([self.delegate respondsToSelector:@selector(treeView:didCollapseRowForItem:)] &&
+    if ([self.delegate respondsToSelector:@selector(treeView:didCollapseRowForItem:section:)] &&
         informDelegate) {
-      [self.delegate treeView:self didCollapseRowForItem:treeNode.item];
+      [self.delegate treeView:self didCollapseRowForItem:treeNode.item section:section];
     }
   }];
   
-  [self collapseCellForTreeNode:treeNode];
+  [self collapseCellForTreeNode:treeNode section:section];
   [CATransaction commit];
 }
 
-- (void)expandCellForTreeNode:(RATreeNode *)treeNode informDelegate:(BOOL)informDelegate
+- (void)expandCellForTreeNode:(RATreeNode *)treeNode section:(NSInteger)section informDelegate:(BOOL)informDelegate
 {
   if (informDelegate) {
-    if ([self.delegate respondsToSelector:@selector(treeView:willExpandRowForItem:)]) {
-      [self.delegate treeView:self willExpandRowForItem:treeNode.item];
+    if ([self.delegate respondsToSelector:@selector(treeView:willExpandRowForItem:section:)]) {
+      [self.delegate treeView:self willExpandRowForItem:treeNode.item section:section];
     }
   }
   
   [CATransaction begin];
   [CATransaction setCompletionBlock:^{
-    if ([self.delegate respondsToSelector:@selector(treeView:didExpandRowForItem:)] &&
+    if ([self.delegate respondsToSelector:@selector(treeView:didExpandRowForItem:section:)] &&
         informDelegate) {
-      [self.delegate treeView:self didExpandRowForItem:treeNode.item];
+      [self.delegate treeView:self didExpandRowForItem:treeNode.item section:section];
     }
   }];
     
-  [self expandCellForTreeNode:treeNode];
+  [self expandCellForTreeNode:treeNode section:section];
   [CATransaction commit];
 }
 

@@ -27,7 +27,10 @@
 
 @interface RAViewController () <RATreeViewDelegate, RATreeViewDataSource>
 
-@property (strong, nonatomic) NSArray *data;
+@property (strong, nonatomic) NSArray *sectionData;
+@property (strong, nonatomic) NSArray *sectionData2;
+@property (strong, nonatomic) NSMutableArray *data;
+
 @property (weak, nonatomic) RATreeView *treeView;
 
 @property (strong, nonatomic) UIBarButtonItem *editButton;
@@ -42,7 +45,7 @@
   
   [self loadData];
   
-  RATreeView *treeView = [[RATreeView alloc] initWithFrame:self.view.bounds];
+  RATreeView *treeView = [[RATreeView alloc] initWithFrame:self.view.bounds style:RATreeViewStyleGrouped];
   
   treeView.delegate = self;
   treeView.dataSource = self;
@@ -96,64 +99,96 @@
 
 #pragma mark TreeView Delegate methods
 
-- (CGFloat)treeView:(RATreeView *)treeView heightForRowForItem:(id)item
+- (NSInteger)numberOfSections
+{
+  return self.data.count;
+}
+
+- (NSInteger)numberOfRowsInSection:(NSInteger)section
+{
+  return [self.data[section] count];
+}
+
+- (CGFloat)treeView:(RATreeView *)treeView heightForRowForItem:(id)item section:(NSInteger)section
 {
   return 44;
 }
 
-- (BOOL)treeView:(RATreeView *)treeView canEditRowForItem:(id)item
+- (BOOL)treeView:(RATreeView *)treeView canEditRowForItem:(id)item section:(NSInteger)section
 {
   return YES;
 }
 
-- (void)treeView:(RATreeView *)treeView willExpandRowForItem:(id)item
+- (void)treeView:(RATreeView *)treeView willExpandRowForItem:(id)item section:(NSInteger)section
 {
-  RATableViewCell *cell = (RATableViewCell *)[treeView cellForItem:item];
+  RATableViewCell *cell = (RATableViewCell *)[treeView cellForItem:item section:section];
   [cell setAdditionButtonHidden:NO animated:YES];
 }
 
-- (void)treeView:(RATreeView *)treeView willCollapseRowForItem:(id)item
+- (void)treeView:(RATreeView *)treeView willCollapseRowForItem:(id)item section:(NSInteger)section
 {
-  RATableViewCell *cell = (RATableViewCell *)[treeView cellForItem:item];
+  RATableViewCell *cell = (RATableViewCell *)[treeView cellForItem:item section:section];
   [cell setAdditionButtonHidden:YES animated:YES];
 }
 
-- (void)treeView:(RATreeView *)treeView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowForItem:(id)item
+- (void)treeView:(RATreeView *)treeView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowForItem:(id)item section:(NSInteger)section
 {
   if (editingStyle != UITableViewCellEditingStyleDelete) {
     return;
   }
   
-  RADataObject *parent = [self.treeView parentForItem:item];
+  RADataObject *parent = [self.treeView parentForItem:item section:section];
   NSInteger index = 0;
   
   if (parent == nil) {
-    index = [self.data indexOfObject:item];
-    NSMutableArray *children = [self.data mutableCopy];
+    NSArray* sectionData = self.data[section];
+    index = [sectionData indexOfObject:item];
+    NSMutableArray *children = [sectionData mutableCopy];
     [children removeObject:item];
-    self.data = [children copy];
+    self.data[section] = [children copy];
     
   } else {
     index = [parent.children indexOfObject:item];
     [parent removeChild:item];
   }
   
-  [self.treeView deleteItemsAtIndexes:[NSIndexSet indexSetWithIndex:index] inParent:parent withAnimation:RATreeViewRowAnimationRight];
+  [self.treeView deleteItemsAtIndexes:[NSIndexSet indexSetWithIndex:index] section:section inParent:parent withAnimation:RATreeViewRowAnimationRight];
   if (parent) {
-    [self.treeView reloadRowsForItems:@[parent] withRowAnimation:RATreeViewRowAnimationNone];
+    [self.treeView reloadRowsForItems:@[parent] section:section withRowAnimation:RATreeViewRowAnimationNone];
   }
 }
 
 #pragma mark TreeView Data Source
 
-- (UITableViewCell *)treeView:(RATreeView *)treeView cellForItem:(id)item
+- (NSString*)treeView:(RATreeView *)treeView titleForHeaderInSection:(NSInteger)section
+{
+  if (section == 0)
+    return @"Section 0";
+
+  return @"Section 1";
+}
+
+//- (UIView*)treeView:(RATreeView *)treeView viewForHeaderInSection:(NSInteger)section
+//{
+//  UILabel* label = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 100, 20)];
+//  label.backgroundColor = [UIColor redColor];
+//  label.text = @"Custom header";
+//  return label;
+//}
+//
+//- (CGFloat)treeView:(RATreeView *)tableView heightForHeaderInSection:(NSInteger)section
+//{
+//  return 60;
+//}
+
+- (UITableViewCell *)treeView:(RATreeView *)treeView cellForItem:(id)item section:(NSInteger)section
 {
   RADataObject *dataObject = item;
   
-  NSInteger level = [self.treeView levelForCellForItem:item];
+  NSInteger level = [self.treeView levelForCellForItem:item section:section];
   NSInteger numberOfChildren = [dataObject.children count];
   NSString *detailText = [NSString localizedStringWithFormat:@"Number of children %@", [@(numberOfChildren) stringValue]];
-  BOOL expanded = [self.treeView isCellForItemExpanded:item];
+  BOOL expanded = [self.treeView isCellForItemExpanded:item section:section];
   
   RATableViewCell *cell = [self.treeView dequeueReusableCellWithIdentifier:NSStringFromClass([RATableViewCell class])];
   [cell setupWithTitle:dataObject.name detailText:detailText level:level additionButtonHidden:!expanded];
@@ -161,33 +196,33 @@
   
   __weak typeof(self) weakSelf = self;
   cell.additionButtonTapAction = ^(id sender){
-    if (![weakSelf.treeView isCellForItemExpanded:dataObject] || weakSelf.treeView.isEditing) {
+    if (![weakSelf.treeView isCellForItemExpanded:dataObject section:section] || weakSelf.treeView.isEditing) {
       return;
     }
     RADataObject *newDataObject = [[RADataObject alloc] initWithName:@"Added value" children:@[]];
     [dataObject addChild:newDataObject];
-    [weakSelf.treeView insertItemsAtIndexes:[NSIndexSet indexSetWithIndex:0] inParent:dataObject withAnimation:RATreeViewRowAnimationLeft];
-    [weakSelf.treeView reloadRowsForItems:@[dataObject] withRowAnimation:RATreeViewRowAnimationNone];
+    [weakSelf.treeView insertItemsAtIndexes:[NSIndexSet indexSetWithIndex:0] section:section inParent:dataObject withAnimation:RATreeViewRowAnimationLeft];
+    [weakSelf.treeView reloadRowsForItems:@[dataObject] section:section withRowAnimation:RATreeViewRowAnimationNone];
   };
   
   return cell;
 }
 
-- (NSInteger)treeView:(RATreeView *)treeView numberOfChildrenOfItem:(id)item
+- (NSInteger)treeView:(RATreeView *)treeView numberOfChildrenOfItem:(id)item section:(NSInteger)section
 {
   if (item == nil) {
-    return [self.data count];
+    return [self.data[section] count];
   }
   
   RADataObject *data = item;
   return [data.children count];
 }
 
-- (id)treeView:(RATreeView *)treeView child:(NSInteger)index ofItem:(id)item
+- (id)treeView:(RATreeView *)treeView child:(NSInteger)index ofItem:(id)item section:(NSInteger)section
 {
   RADataObject *data = item;
   if (item == nil) {
-    return [self.data objectAtIndex:index];
+    return [self.data[section] objectAtIndex:index];
   }
   
   return data.children[index];
@@ -226,7 +261,11 @@
   RADataObject *watches = [RADataObject dataObjectWithName:@"Watches" children:nil];
   RADataObject *walls = [RADataObject dataObjectWithName:@"Walls" children:nil];
   
-  self.data = [NSArray arrayWithObjects:phone, computer, car, bike, house, flats, motorbike, drinks, food, sweets, watches, walls, nil];
+  self.sectionData = [NSArray arrayWithObjects:phone, computer, car, bike, house, flats, motorbike, drinks, food, sweets, watches, walls, nil];
+
+  self.sectionData2 = [NSArray arrayWithObjects:phone, computer, car, bike, house, flats, motorbike, drinks, food, sweets, watches, walls, nil];
+
+  self.data = [NSMutableArray arrayWithArray:@[self.sectionData, self.sectionData2]];
 
 }
 

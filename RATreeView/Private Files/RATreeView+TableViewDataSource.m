@@ -30,21 +30,39 @@
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-  return 1;
+  return [self.dataSource numberOfSections];
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-  if (self.treeNodeCollectionController == nil) {
-    [self setupTreeStructure];
+  if (self.treeNodeCollectionControllers == nil || ![self.treeNodeCollectionControllers objectAtIndex:section]) {
+    [self setupTreeStructure:section];
   }
-  return self.treeNodeCollectionController.numberOfVisibleRowsForItems;
+  return self.treeNodeCollectionControllers[section].numberOfVisibleRowsForItems;
+}
+
+- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
+{
+  if ([self.dataSource respondsToSelector:@selector(treeView:titleForHeaderInSection:)]) {
+    return [self.dataSource treeView:self titleForHeaderInSection:section];
+  }
+
+  return nil;
+}
+
+- (NSString *)tableView:(UITableView *)tableView titleForFooterInSection:(NSInteger)section
+{
+  if ([self.dataSource respondsToSelector:@selector(treeView:titleForFooterInSection:)]) {
+    return [self.dataSource treeView:self titleForFooterInSection:section];
+  }
+
+  return nil;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
   RATreeNode *treeNode = [self treeNodeForIndexPath:indexPath];
-  return [self.dataSource treeView:self cellForItem:treeNode.item];
+  return [self.dataSource treeView:self cellForItem:treeNode.item section:indexPath.section];
 }
 
 
@@ -52,17 +70,17 @@
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
 {
-  if ([self.dataSource respondsToSelector:@selector(treeView:commitEditingStyle:forRowForItem:)]) {
+  if ([self.dataSource respondsToSelector:@selector(treeView:commitEditingStyle:forRowForItem:section:)]) {
     RATreeNode *treeNode = [self treeNodeForIndexPath:indexPath];
-    [self.dataSource treeView:self commitEditingStyle:editingStyle forRowForItem:treeNode.item];
+    [self.dataSource treeView:self commitEditingStyle:editingStyle forRowForItem:treeNode.item section:indexPath.section];
   }
 }
 
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
 {
-  if ([self.dataSource respondsToSelector:@selector(treeView:canEditRowForItem:)]) {
+  if ([self.dataSource respondsToSelector:@selector(treeView:canEditRowForItem:section:)]) {
     RATreeNode *treeNode = [self treeNodeForIndexPath:indexPath];
-    return [self.dataSource treeView:self canEditRowForItem:treeNode.item];
+    return [self.dataSource treeView:self canEditRowForItem:treeNode.item section:indexPath.section];
   }
   return YES;
 }

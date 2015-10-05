@@ -61,6 +61,14 @@ typedef enum RATreeViewRowAnimation {
  */
 @protocol RATreeViewDataSource <NSObject>
 
+- (NSInteger)numberOfSections;
+
+- (NSInteger)numberOfRowsInSection:(NSInteger)section;
+
+- (NSString*)treeView:(RATreeView*)treeView titleForHeaderInSection:(NSInteger)section;
+
+- (NSString*)treeView:(RATreeView*)treeView titleForFooterInSection:(NSInteger)section;
+
 ///------------------------------------------------
 /// Configuring a Tree View
 ///------------------------------------------------
@@ -74,7 +82,7 @@ typedef enum RATreeViewRowAnimation {
  *
  *  @return The number of child items encompassed by item. If item is nil, this method should return the number of children for the top-level item.
  */
-- (NSInteger)treeView:(RATreeView *)treeView numberOfChildrenOfItem:(id)item;
+- (NSInteger)treeView:(RATreeView *)treeView numberOfChildrenOfItem:(id)item section:(NSInteger)section;
 
 
 /**
@@ -85,7 +93,7 @@ typedef enum RATreeViewRowAnimation {
  *
  *  @return An object inheriting from UITableViewCell that the tree view can use for the specified row. An assertion is raised if you return nil.
  */
-- (UITableViewCell *)treeView:(RATreeView *)treeView cellForItem:(id)item;
+- (UITableViewCell *)treeView:(RATreeView *)treeView cellForItem:(id)item section:(NSInteger)section;
 
 /**
  *  Ask the data source to return the child item at the specified index of a given item. (required)
@@ -96,7 +104,7 @@ typedef enum RATreeViewRowAnimation {
  *
  *  @return The child item at index of a item. If item is nil, returns the appropriate child item of the root object.
  */
-- (id)treeView:(RATreeView *)treeView child:(NSInteger)index ofItem:(id)item;
+- (id)treeView:(RATreeView *)treeView child:(NSInteger)index ofItem:(id)item section:(NSInteger)section;
 
 @optional
 
@@ -112,7 +120,7 @@ typedef enum RATreeViewRowAnimation {
  *  @param item         An item identifying a cell in tree view.
  *  @param treeNodeInfo Object including additional information about item.
  */
-- (void)treeView:(RATreeView *)treeView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowForItem:(id)item;
+- (void)treeView:(RATreeView *)treeView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowForItem:(id)item section:(NSInteger)section;
 
 /**
  *  Asks the data source to verify that row for given item is editable.
@@ -122,7 +130,7 @@ typedef enum RATreeViewRowAnimation {
  *
  *  @return `YES` if the row indicated by indexPath is editable; otherwise, `NO`.
  */
-- (BOOL)treeView:(RATreeView *)treeView canEditRowForItem:(id)item;
+- (BOOL)treeView:(RATreeView *)treeView canEditRowForItem:(id)item section:(NSInteger)section;
 
 @end
 
@@ -134,6 +142,14 @@ typedef enum RATreeViewRowAnimation {
 
 @optional
 
+
+- (UIView*)treeView:(RATreeView*)treeView viewForHeaderInSection:(NSInteger)section;
+
+- (UIView*)treeView:(RATreeView*)treeView viewForFooterInSection:(NSInteger)section;
+
+- (CGFloat)treeView:(RATreeView*)tableView heightForHeaderInSection:(NSInteger)section;
+
+- (CGFloat)treeView:(RATreeView*)tableView heightForFooterInSection:(NSInteger)section;
 
 ///------------------------------------------------
 /// Configuring Rows for the Tree View
@@ -147,7 +163,7 @@ typedef enum RATreeViewRowAnimation {
  *
  *  @return A nonnegative floating-point value that specifies the height (in points) that row should be.
  */
-- (CGFloat)treeView:(RATreeView *)treeView heightForRowForItem:(id)item;
+- (CGFloat)treeView:(RATreeView *)treeView heightForRowForItem:(id)item section:(NSInteger)section;
 
 /**
  *  Asks the delegate for the estimated height of a row for a specified item.
@@ -157,7 +173,7 @@ typedef enum RATreeViewRowAnimation {
  *
  *  @return A nonnegative floating-point value that specifies the height (in points) of the header for section.
  */
-- (CGFloat)treeView:(RATreeView *)treeView estimatedHeightForRowForItem:(id)item NS_AVAILABLE_IOS(7_0);
+- (CGFloat)treeView:(RATreeView *)treeView estimatedHeightForRowForItem:(id)item section:(NSInteger)section NS_AVAILABLE_IOS(7_0);
 
 /**
  *  Asks the delegate to return the level of indentation for a row for a specified item.
@@ -167,7 +183,7 @@ typedef enum RATreeViewRowAnimation {
  *
  *  @return Returns the depth of the specified row to show its hierarchical position.
  */
-- (NSInteger)treeView:(RATreeView *)treeView indentationLevelForRowForItem:(id)item;
+- (NSInteger)treeView:(RATreeView *)treeView indentationLevelForRowForItem:(id)item section:(NSInteger)section;
 
 /**
  *  Tells the delegate the tree view is about to draw a cell for a particular item.
@@ -176,7 +192,7 @@ typedef enum RATreeViewRowAnimation {
  *  @param cell         A table-view cell object that tableView is going to use when drawing the row.
  *  @param item         An item identifying a cell in tree view.
  */
-- (void)treeView:(RATreeView *)treeView willDisplayCell:(UITableViewCell *)cell forItem:(id)item;
+- (void)treeView:(RATreeView *)treeView willDisplayCell:(UITableViewCell *)cell forItem:(id)item section:(NSInteger)section;
 
 ///------------------------------------------------
 /// @name Managing Accessory Views
@@ -188,7 +204,7 @@ typedef enum RATreeViewRowAnimation {
  *  @param treeView     The tree-view object informing the delegate of this event.
  *  @param item         An item identifying a cell in tree view.
  */
-- (void)treeView:(RATreeView *)treeView accessoryButtonTappedForRowForItem:(id)item;
+- (void)treeView:(RATreeView *)treeView accessoryButtonTappedForRowForItem:(id)item section:(NSInteger)section;
 
 
 ///------------------------------------------------
@@ -205,7 +221,7 @@ typedef enum RATreeViewRowAnimation {
  *  @return YES if the background of the row should be expanded, otherwise NO.
  *  @discussion If the delegate does not implement this method, the default is YES.
  */
-- (BOOL)treeView:(RATreeView *)treeView shouldExpandRowForItem:(id)item;
+- (BOOL)treeView:(RATreeView *)treeView shouldExpandRowForItem:(id)item section:(NSInteger)section;
 
 /**
  *  Asks delegate whether a row for a specified item should be collapsed.
@@ -216,7 +232,7 @@ typedef enum RATreeViewRowAnimation {
  *  @return YES if the background of the row should be expanded, otherwise NO.
  *  @discussion If the delegate does not implement this method, the default is YES.
  */
-- (BOOL)treeView:(RATreeView *)treeView shouldCollapaseRowForItem:(id)item;
+- (BOOL)treeView:(RATreeView *)treeView shouldCollapaseRowForItem:(id)item section:(NSInteger)section;
 
 /**
  *  Tells the delegate that a row for a specified item is about to be expanded.
@@ -224,7 +240,7 @@ typedef enum RATreeViewRowAnimation {
  *  @param treeView     A tree-view object informing the delegate about the impending expansion.
  *  @param item         An item identifying a row in tree view.
  */
-- (void)treeView:(RATreeView *)treeView willExpandRowForItem:(id)item;
+- (void)treeView:(RATreeView *)treeView willExpandRowForItem:(id)item section:(NSInteger)section;
 
 /**
  *  Tells the delegate that a row for a specified item is about to be collapsed.
@@ -232,7 +248,7 @@ typedef enum RATreeViewRowAnimation {
  *  @param treeView     A tree-view object informing the delegate about the impending collapse.
  *  @param item         An item identifying a row in tree view.
  */
-- (void)treeView:(RATreeView *)treeView willCollapseRowForItem:(id)item;
+- (void)treeView:(RATreeView *)treeView willCollapseRowForItem:(id)item section:(NSInteger)section;
 
 /**
  *  Tells the delegate that the row for a specified item is now expanded.
@@ -240,7 +256,7 @@ typedef enum RATreeViewRowAnimation {
  *  @param treeView     A tree-view object informing the delegate that new row is expanded.
  *  @param item         An item identifying a row in tree view.
  */
-- (void)treeView:(RATreeView *)treeView didExpandRowForItem:(id)item;
+- (void)treeView:(RATreeView *)treeView didExpandRowForItem:(id)item section:(NSInteger)section;
 
 /**
  *  Tells the delegate that the row for a specified item is now collapsed.
@@ -248,7 +264,7 @@ typedef enum RATreeViewRowAnimation {
  *  @param treeView     A tree-view object informing the delegate that new row is collapsed.
  *  @param item         An item identifying a row in tree view.
  */
-- (void)treeView:(RATreeView *)treeView didCollapseRowForItem:(id)item;
+- (void)treeView:(RATreeView *)treeView didCollapseRowForItem:(id)item section:(NSInteger)section;
 
 
 ///------------------------------------------------
@@ -263,7 +279,7 @@ typedef enum RATreeViewRowAnimation {
  *
  *  @return An id object that confirms or alters the selected row. Return an id object other than item if you want another cell to be selected. Return nil if you don't want the row selected.
  */
-- (id)treeView:(RATreeView *)treeView willSelectRowForItem:(id)item;
+- (id)treeView:(RATreeView *)treeView willSelectRowForItem:(id)item section:(NSInteger)section;
 
 /**
  *  Tells the delegate that the row for a specified item is now selected.
@@ -271,7 +287,7 @@ typedef enum RATreeViewRowAnimation {
  *  @param treeView     A tree-view object informing the delegate about the new row selection.
  *  @param item         An item identifying a row in tree view.
  */
-- (void)treeView:(RATreeView *)treeView didSelectRowForItem:(id)item;
+- (void)treeView:(RATreeView *)treeView didSelectRowForItem:(id)item section:(NSInteger)section;
 
 /**
  *  Tells the delegate that a row for a specified item is about to be deselected.
@@ -281,7 +297,7 @@ typedef enum RATreeViewRowAnimation {
  *
  *  @return An id object that confirms or alters the deselected row. Return an id object other than item if you want another cell to be deselected. Return nil if you don’t want the row deselected.
  */
-- (id)treeView:(RATreeView *)treeView willDeselectRowForItem:(id)item;
+- (id)treeView:(RATreeView *)treeView willDeselectRowForItem:(id)item section:(NSInteger)section;
 
 /**
  *  Tells the delegate that the row for a specified item is now deselected.
@@ -289,7 +305,7 @@ typedef enum RATreeViewRowAnimation {
  *  @param treeView     A tree-view object informing the delegate about the row deselection.
  *  @param item         An item identifying a row in tree view.
  */
-- (void)treeView:(RATreeView *)treeView didDeselectRowForItem:(id)item;
+- (void)treeView:(RATreeView *)treeView didDeselectRowForItem:(id)item section:(NSInteger)section;
 
 
 ///------------------------------------------------
@@ -464,7 +480,8 @@ typedef enum RATreeViewRowAnimation {
 /// @name Configuring the Tree View
 ///------------------------------------------------
 
-- (NSInteger)numberOfRows;
+- (NSInteger)numberOfSections;
+- (NSInteger)numberOfRowsInSection:(NSInteger)section;
 @property (nonatomic, readonly) RATreeViewStyle style;
 @property (nonatomic) RATreeViewCellSeparatorStyle separatorStyle;
 @property (strong, nonatomic) UIColor *separatorColor;
@@ -478,12 +495,12 @@ typedef enum RATreeViewRowAnimation {
 /// @name Expanding and Collapsing Rows
 ///------------------------------------------------
 
-- (void)expandRowForItem:(id)item expandChildren:(BOOL)expandChildren withRowAnimation:(RATreeViewRowAnimation)animation;
-- (void)expandRowForItem:(id)item withRowAnimation:(RATreeViewRowAnimation)animation;
-- (void)expandRowForItem:(id)item;
-- (void)collapseRowForItem:(id)item collapseChildren:(BOOL)collapseChildren withRowAnimation:(RATreeViewRowAnimation)animation;
-- (void)collapseRowForItem:(id)item withRowAnimation:(RATreeViewRowAnimation)animation;
-- (void)collapseRowForItem:(id)item;
+- (void)expandRowForItem:(id)item section:(NSInteger)section expandChildren:(BOOL)expandChildren withRowAnimation:(RATreeViewRowAnimation)animation;
+- (void)expandRowForItem:(id)item section:(NSInteger)section withRowAnimation:(RATreeViewRowAnimation)animation;
+- (void)expandRowForItem:(id)item section:(NSInteger)section;
+- (void)collapseRowForItem:(id)item section:(NSInteger)section collapseChildren:(BOOL)collapseChildren withRowAnimation:(RATreeViewRowAnimation)animation;
+- (void)collapseRowForItem:(id)item section:(NSInteger)section withRowAnimation:(RATreeViewRowAnimation)animation;
+- (void)collapseRowForItem:(id)item section:(NSInteger)section;
 @property (nonatomic) BOOL expandsChildRowsWhenRowExpands;
 @property (nonatomic) BOOL collapsesChildRowsWhenRowCollapses;
 @property (nonatomic) RATreeViewRowAnimation rowsExpandingAnimation;
@@ -496,9 +513,9 @@ typedef enum RATreeViewRowAnimation {
 
 - (void)beginUpdates;
 - (void)endUpdates;
-- (void)insertItemsAtIndexes:(NSIndexSet *)indexes inParent:(id)parent withAnimation:(RATreeViewRowAnimation)animation;
-- (void)moveItemAtIndex:(NSInteger)oldIndex inParent:(id)oldParent toIndex:(NSInteger)newIndex inParent:(id)newParent;
-- (void)deleteItemsAtIndexes:(NSIndexSet *)indexes inParent:(id)parent withAnimation:(RATreeViewRowAnimation)animation;
+- (void)insertItemsAtIndexes:(NSIndexSet *)indexes section:(NSInteger)section inParent:(id)parent withAnimation:(RATreeViewRowAnimation)animation;
+- (void)moveItemAtIndex:(NSInteger)oldIndex section:(NSInteger)section inParent:(id)oldParent toIndex:(NSInteger)newIndex inParent:(id)newParent;
+- (void)deleteItemsAtIndexes:(NSIndexSet *)indexes section:(NSInteger)section inParent:(id)parent withAnimation:(RATreeViewRowAnimation)animation;
 
 
 ///------------------------------------------------
@@ -525,30 +542,30 @@ typedef enum RATreeViewRowAnimation {
 /// @name Working with Expandability
 ///------------------------------------------------
 
-- (BOOL)isCellForItemExpanded:(id)item;
-- (BOOL)isCellExpanded:(UITableViewCell *)cell;
+- (BOOL)isCellForItemExpanded:(id)item section:(NSInteger)section;
+- (BOOL)isCellExpanded:(UITableViewCell *)cell section:(NSInteger)section;
 
 
 ///------------------------------------------------
 /// @name Working with Indentation
 ///------------------------------------------------
 
-- (NSInteger)levelForCellForItem:(id)item;
-- (NSInteger)levelForCell:(UITableViewCell *)cell;
+- (NSInteger)levelForCellForItem:(id)item section:(NSInteger)section;
+- (NSInteger)levelForCell:(UITableViewCell *)cell section:(NSInteger)section;
 
 
 ///------------------------------------------------
 /// @name Getting the Parent for an Item
 ///------------------------------------------------
 
-- (id)parentForItem:(id)parent;
+- (id)parentForItem:(id)parent section:(NSInteger)section;
 
 
 ///------------------------------------------------
 /// @name Accessing Cells
 ///------------------------------------------------
 
-- (UITableViewCell *)cellForItem:(id)item;
+- (UITableViewCell *)cellForItem:(id)item section:(NSInteger)section;
 - (NSArray *)visibleCells;
 - (id)itemForCell:(UITableViewCell *)cell;
 - (id)itemForRowAtPoint:(CGPoint)point;
@@ -560,7 +577,7 @@ typedef enum RATreeViewRowAnimation {
 /// @name Scrolling the TreeView
 ///------------------------------------------------
 
-- (void)scrollToRowForItem:(id)item atScrollPosition:(RATreeViewScrollPosition)scrollPosition animated:(BOOL)animated;
+- (void)scrollToRowForItem:(id)item section:(NSInteger)section atScrollPosition:(RATreeViewScrollPosition)scrollPosition animated:(BOOL)animated;
 - (void)scrollToNearestSelectedRowAtScrollPosition:(RATreeViewScrollPosition)scrollPosition animated:(BOOL)animated;
 
 
@@ -570,8 +587,8 @@ typedef enum RATreeViewRowAnimation {
 
 - (id)itemForSelectedRow;
 - (NSArray *)itemsForSelectedRows;
-- (void)selectRowForItem:(id)item animated:(BOOL)animated scrollPosition:(RATreeViewScrollPosition)scrollPosition;
-- (void)deselectRowForItem:(id)item animated:(BOOL)animated;
+- (void)selectRowForItem:(id)item section:(NSInteger)section animated:(BOOL)animated scrollPosition:(RATreeViewScrollPosition)scrollPosition;
+- (void)deselectRowForItem:(id)item section:(NSInteger)section animated:(BOOL)animated;
 @property (nonatomic) BOOL allowsSelection;
 @property (nonatomic) BOOL allowsMultipleSelection;
 @property (nonatomic) BOOL allowsSelectionDuringEditing;
@@ -591,7 +608,7 @@ typedef enum RATreeViewRowAnimation {
 ///------------------------------------------------
 
 - (void)reloadData;
-- (void)reloadRowsForItems:(NSArray *)items withRowAnimation:(RATreeViewRowAnimation)animation;
+- (void)reloadRowsForItems:(NSArray *)items section:(NSInteger)section withRowAnimation:(RATreeViewRowAnimation)animation;
 - (void)reloadRows;
 
 /////////////////////////////

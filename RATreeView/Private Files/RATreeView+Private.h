@@ -28,16 +28,16 @@
 @interface RATreeView (Private)
 
 - (RATreeNode *)treeNodeForIndexPath:(NSIndexPath *)indexPath;
-- (NSIndexPath *)indexPathForItem:(id)item;
+- (NSIndexPath *)indexPathForItem:(id)item section:(NSInteger)section;
 
-- (void)setupTreeStructure;
+- (void)setupTreeStructure:(NSInteger)section;
 
-- (void)collapseCellForTreeNode:(RATreeNode *)treeNode;
-- (void)collapseCellForTreeNode:(RATreeNode *)treeNode collapseChildren:(BOOL)collapseChildren withRowAnimation:(RATreeViewRowAnimation)rowAnimation;
-- (void)expandCellForTreeNode:(RATreeNode *)treeNode;
-- (void)expandCellForTreeNode:(RATreeNode *)treeNode expandChildren:(BOOL)expandChildren withRowAnimation:(RATreeViewRowAnimation)rowAnimation;
+- (void)collapseCellForTreeNode:(RATreeNode *)treeNode section:(NSInteger)section;
+- (void)collapseCellForTreeNode:(RATreeNode *)treeNode section:(NSInteger)section collapseChildren:(BOOL)collapseChildren withRowAnimation:(RATreeViewRowAnimation)rowAnimation;
+- (void)expandCellForTreeNode:(RATreeNode *)treeNode section:(NSInteger)section;
+- (void)expandCellForTreeNode:(RATreeNode *)treeNode section:(NSInteger)section expandChildren:(BOOL)expandChildren withRowAnimation:(RATreeViewRowAnimation)rowAnimation;
 
-- (void)insertItemAtIndex:(NSInteger)index inParent:(id)parent withAnimation:(RATreeViewRowAnimation)animation;
-- (void)removeItemAtIndex:(NSInteger)indexe inParent:(id)parent withAnimation:(RATreeViewRowAnimation)animation;
+- (void)insertItemAtIndex:(NSInteger)index section:(NSInteger)section inParent:(id)parent withAnimation:(RATreeViewRowAnimation)animation;
+- (void)removeItemAtIndex:(NSInteger)indexe section:(NSInteger)section inParent:(id)parent withAnimation:(RATreeViewRowAnimation)animation;
 
 @end

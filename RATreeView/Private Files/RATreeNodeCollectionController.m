@@ -31,11 +31,20 @@
 @interface RATreeNodeCollectionController () <RATreeNodeItemDataSource>
 
 @property (nonatomic, strong) RATreeNodeController *rootController;
-
+@property (assign, readwrite) NSInteger section;
 @end
 
 
 @implementation RATreeNodeCollectionController
+
+- (instancetype)initWithSection:(NSInteger)section
+{
+  if (self = [super init]) {
+    self.section = section;
+  }
+
+  return self;
+}
 
 - (NSInteger)numberOfVisibleRowsForItems
 {
@@ -96,7 +105,7 @@
       [oldChildItems addObject:nodeController.treeNode.item];
     }
     
-    NSInteger numberOfChildren = [self.dataSource treeNodeCollectionController:self numberOfChildrenForItem:controller.treeNode.item];
+    NSInteger numberOfChildren = [self.dataSource treeNodeCollectionController:self numberOfChildrenForItem:controller.treeNode.item section:self.section];
     NSIndexSet *allIndexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, numberOfChildren)];
     
     NSArray *currentChildControllersAndIndexes = [self controllersAndIndexesForNodesWithIndexes:allIndexes inParentController:controller];
@@ -263,12 +272,12 @@
 
 - (id)treeNodeController:(RATreeNodeController *)controller child:(NSInteger)childIndex
 {
-  return [self.dataSource treeNodeCollectionController:self child:childIndex ofItem:controller.treeNode.item];
+  return [self.dataSource treeNodeCollectionController:self child:childIndex ofItem:controller.treeNode.item section:self.section];
 }
 
 - (NSInteger)numberOfChildrenForTreeNodeController:(RATreeNodeController *)controller
 {
-  return [self.dataSource treeNodeCollectionController:self numberOfChildrenForItem:controller.treeNode.item];
+  return [self.dataSource treeNodeCollectionController:self numberOfChildrenForItem:controller.treeNode.item section:self.section];
 }
 
 
@@ -276,7 +285,7 @@
 
 - (id)itemForTreeNodeItem:(RATreeNodeItem *)treeNodeItem
 {
-  return [self.dataSource treeNodeCollectionController:self child:treeNodeItem.index ofItem:treeNodeItem.parent];
+  return [self.dataSource treeNodeCollectionController:self child:treeNodeItem.index ofItem:treeNodeItem.parent section:self.section];
 }
 
 
@@ -289,7 +298,7 @@
       return YES;
     }];
     
-    NSInteger numberOfChildren = [self.dataSource treeNodeCollectionController:self numberOfChildrenForItem:nil];
+    NSInteger numberOfChildren = [self.dataSource treeNodeCollectionController:self numberOfChildrenForItem:nil section:self.section];
     NSIndexSet *indexSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, numberOfChildren)];
     NSArray *childControllers = [self controllersForNodesWithIndexes:indexSet inParentController:_rootController];
     [_rootController insertChildControllers:childControllers atIndexes:indexSet];

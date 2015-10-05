@@ -30,6 +30,7 @@
 #import "RATreeNodeCollectionController.h"
 #import "RATreeNode.h"
 
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 @implementation RATreeView
@@ -107,6 +108,8 @@
 
 - (void)commonInitWithFrame:(CGRect)frame style:(RATreeViewStyle)style
 {
+  _treeNodeCollectionControllers = [NSMutableArray array];
+
   UITableViewStyle tableViewStyle = [RATreeView tableViewStyleForTreeViewStyle:style];
   
   UITableView *tableView =  [[UITableView alloc] initWithFrame:frame style:tableViewStyle];
@@ -123,12 +126,29 @@
   self.rowsCollapsingAnimation = RATreeViewRowAnimationBottom;
 }
 
+#pragma mark Configure Class Extension
+@synthesize treeNodeCollectionControllers = _treeNodeCollectionControllers;
+
+- (NSArray<RATreeNodeCollectionController*>*)treeNodeCollectionControllers
+{
+  return _treeNodeCollectionControllers;
+}
+
+- (void)addTreeNodeCollectionControllersObject:(RATreeNodeCollectionController *)object
+{
+  [_treeNodeCollectionControllers addObject:object];
+}
 
 #pragma mark Configuring a Tree View
 
-- (NSInteger)numberOfRows
+- (NSInteger)numberOfSections
 {
-  return [self.tableView numberOfRowsInSection:0];
+  return [self.dataSource numberOfSections];
+}
+
+- (NSInteger)numberOfRowsInSection:(NSInteger)section
+{
+  return [self.dataSource numberOfRowsInSection:section];
 }
 
 - (RATreeViewStyle)style
@@ -202,44 +222,44 @@
 
 #pragma mark Expanding and Collapsing Rows
 
-- (void)expandRowForItem:(id)item
+- (void)expandRowForItem:(id)item section:(NSInteger)section
 {
-  [self expandRowForItem:item withRowAnimation:self.rowsExpandingAnimation];
+  [self expandRowForItem:item section:section withRowAnimation:self.rowsExpandingAnimation];
 }
 
-- (void)expandRowForItem:(id)item withRowAnimation:(RATreeViewRowAnimation)animation
+- (void)expandRowForItem:(id)item section:(NSInteger)section withRowAnimation:(RATreeViewRowAnimation)animation
 {
-  [self expandRowForItem:item expandChildren:NO withRowAnimation:animation];
+  [self expandRowForItem:item section:section expandChildren:NO withRowAnimation:animation];
 }
 
-- (void)expandRowForItem:(id)item expandChildren:(BOOL)expandChildren withRowAnimation:(RATreeViewRowAnimation)animation
+- (void)expandRowForItem:(id)item section:(NSInteger)section expandChildren:(BOOL)expandChildren withRowAnimation:(RATreeViewRowAnimation)animation
 {
-  NSIndexPath *indexPath = [self indexPathForItem:item];
+  NSIndexPath *indexPath = [self indexPathForItem:item section:section];
   RATreeNode *treeNode = [self treeNodeForIndexPath:indexPath];
   if (!treeNode || treeNode.expanded) {
     return;
   }
-  [self expandCellForTreeNode:treeNode expandChildren:expandChildren withRowAnimation:animation];
+  [self expandCellForTreeNode:treeNode section:section expandChildren:expandChildren withRowAnimation:animation];
 }
 
-- (void)collapseRowForItem:(id)item
+- (void)collapseRowForItem:(id)item section:(NSInteger)section
 {
-  [self collapseRowForItem:item withRowAnimation:self.rowsCollapsingAnimation];
+  [self collapseRowForItem:item section:section withRowAnimation:self.rowsCollapsingAnimation];
 }
 
-- (void)collapseRowForItem:(id)item withRowAnimation:(RATreeViewRowAnimation)animation
+- (void)collapseRowForItem:(id)item section:(NSInteger)section withRowAnimation:(RATreeViewRowAnimation)animation
 {
-  [self collapseRowForItem:item collapseChildren:NO withRowAnimation:animation];
+  [self collapseRowForItem:item section:section collapseChildren:NO withRowAnimation:animation];
 }
 
-- (void)collapseRowForItem:(id)item collapseChildren:(BOOL)collapseChildren withRowAnimation:(RATreeViewRowAnimation)animation
+- (void)collapseRowForItem:(id)item section:(NSInteger)section collapseChildren:(BOOL)collapseChildren withRowAnimation:(RATreeViewRowAnimation)animation
 {
-  NSIndexPath *indexPath = [self indexPathForItem:item];
+  NSIndexPath *indexPath = [self indexPathForItem:item section:section];
   RATreeNode *treeNode = [self treeNodeForIndexPath:indexPath];
   if (!treeNode) {
     return;
   }
-  [self collapseCellForTreeNode:treeNode collapseChildren:collapseChildren withRowAnimation:animation];
+  [self collapseCellForTreeNode:treeNode section:section collapseChildren:collapseChildren withRowAnimation:animation];
 }
 
 
@@ -257,25 +277,25 @@
   [self.tableView endUpdates];
 }
 
-- (void)insertItemsAtIndexes:(NSIndexSet *)indexes inParent:(id)parent withAnimation:(RATreeViewRowAnimation)animation
+- (void)insertItemsAtIndexes:(NSIndexSet *)indexes section:(NSInteger)section inParent:(id)parent withAnimation:(RATreeViewRowAnimation)animation
 {
-  if (parent && ![self isCellForItemExpanded:parent]) {
+  if (parent && ![self isCellForItemExpanded:parent section:section]) {
     return;
   }
   __weak typeof(self) weakSelf = self;
   [indexes enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
-    [weakSelf insertItemAtIndex:idx inParent:parent withAnimation:animation];
+    [weakSelf insertItemAtIndex:idx section:section inParent:parent withAnimation:animation];
   }];
 }
 
-- (void)deleteItemsAtIndexes:(NSIndexSet *)indexes inParent:(id)parent withAnimation:(RATreeViewRowAnimation)animation
+- (void)deleteItemsAtIndexes:(NSIndexSet *)indexes section:(NSInteger)section inParent:(id)parent withAnimation:(RATreeViewRowAnimation)animation
 {
-  if (parent && ![self isCellForItemExpanded:parent]) {
+  if (parent && ![self isCellForItemExpanded:parent section:section]) {
     return;
   }
   __weak typeof(self) weakSelf = self;
   [indexes enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
-    [weakSelf removeItemAtIndex:idx inParent:parent withAnimation:animation];
+    [weakSelf removeItemAtIndex:idx section:section inParent:parent withAnimation:animation];
   }];
 }
 
@@ -338,44 +358,44 @@
 
 #pragma mark - Working with Expandability
 
-- (BOOL)isCellForItemExpanded:(id)item
+- (BOOL)isCellForItemExpanded:(id)item section:(NSInteger)section
 {
-  NSIndexPath *indexPath = [self indexPathForItem:item];
+  NSIndexPath *indexPath = [self indexPathForItem:item section:section];
   return [self treeNodeForIndexPath:indexPath].expanded;
 }
 
-- (BOOL)isCellExpanded:(UITableViewCell *)cell
+- (BOOL)isCellExpanded:(UITableViewCell *)cell section:(NSInteger)section
 {
   id item = [self itemForCell:cell];
-  return [self isCellForItemExpanded:item];
+  return [self isCellForItemExpanded:item section:section];
 }
 
 #pragma mark - Working with Indentation
 
-- (NSInteger)levelForCellForItem:(id)item
+- (NSInteger)levelForCellForItem:(id)item section:(NSInteger)section
 {
-  return [self.treeNodeCollectionController levelForItem:item];
+  return [self.treeNodeCollectionControllers[section] levelForItem:item];
 }
 
-- (NSInteger)levelForCell:(UITableViewCell *)cell
+- (NSInteger)levelForCell:(UITableViewCell *)cell section:(NSInteger)section
 {
   id item = [self itemForCell:cell];
-  return [self levelForCellForItem:item];
+  return [self levelForCellForItem:item section:section];
 }
 
 #pragma mark - Getting the Parent for an Item
 
-- (id)parentForItem:(id)item
+- (id)parentForItem:(id)item section:(NSInteger)section
 {
-  return [self.treeNodeCollectionController parentForItem:item];
+  return [self.treeNodeCollectionControllers[section] parentForItem:item];
 }
 
 
 #pragma mark - Accessing Cells
 
-- (UITableViewCell *)cellForItem:(id)item
+- (UITableViewCell *)cellForItem:(id)item section:(NSInteger)section
 {
-  NSIndexPath *indexPath = [self indexPathForItem:item];
+  NSIndexPath *indexPath = [self indexPathForItem:item section:section];
   return [self.tableView cellForRowAtIndexPath:indexPath];
 }
 
@@ -411,9 +431,9 @@
 
 #pragma mark - Scrolling the TreeView
 
-- (void)scrollToRowForItem:(id)item atScrollPosition:(RATreeViewScrollPosition)scrollPosition animated:(BOOL)animated
+- (void)scrollToRowForItem:(id)item section:(NSInteger)section atScrollPosition:(RATreeViewScrollPosition)scrollPosition animated:(BOOL)animated
 {
-  NSIndexPath *indexPath = [self indexPathForItem:item];
+  NSIndexPath *indexPath = [self indexPathForItem:item section:section];
   UITableViewScrollPosition tableViewScrollPosition = [RATreeView tableViewScrollPositionForTreeViewScrollPosition:scrollPosition];
   [self.tableView scrollToRowAtIndexPath:indexPath atScrollPosition:tableViewScrollPosition animated:animated];
 }
@@ -439,19 +459,19 @@
   return [self itemsForIndexPaths:selectedRows];
 }
 
-- (void)selectRowForItem:(id)item animated:(BOOL)animated scrollPosition:(RATreeViewScrollPosition)scrollPosition
+- (void)selectRowForItem:(id)item section:(NSInteger)section animated:(BOOL)animated scrollPosition:(RATreeViewScrollPosition)scrollPosition
 {
-  if ([self isCellForItemExpanded:[self parentForItem:item]]) {
-    NSIndexPath *indexPath = [self indexPathForItem:item];
+  if ([self isCellForItemExpanded:[self parentForItem:item section:section] section:section]) {
+    NSIndexPath *indexPath = [self indexPathForItem:item section:section];
     UITableViewScrollPosition tableViewScrollPosition = [RATreeView tableViewScrollPositionForTreeViewScrollPosition:scrollPosition];
     [self.tableView selectRowAtIndexPath:indexPath animated:animated scrollPosition:tableViewScrollPosition];
   }
 }
 
-- (void)deselectRowForItem:(id)item animated:(BOOL)animated
+- (void)deselectRowForItem:(id)item section:(NSInteger)section animated:(BOOL)animated
 {
-  if ([self isCellForItemExpanded:[self parentForItem:item]]) {
-    NSIndexPath *indexPath = [self indexPathForItem:item];
+  if ([self isCellForItemExpanded:[self parentForItem:item section:section] section:section]) {
+    NSIndexPath *indexPath = [self indexPathForItem:item section:section];
     [self.tableView deselectRowAtIndexPath:indexPath animated:animated];
   }
 }
@@ -519,16 +539,19 @@
 
 - (void)reloadData
 {
-  [self setupTreeStructure];
+  for (NSInteger section = 0; section < [self numberOfSections]; ++section) {
+    [self setupTreeStructure:section];
+  }
+
   [self.tableView reloadData];
 }
 
-- (void)reloadRowsForItems:(NSArray *)items withRowAnimation:(RATreeViewRowAnimation)animation
+- (void)reloadRowsForItems:(NSArray *)items section:(NSInteger)section withRowAnimation:(RATreeViewRowAnimation)animation
 {
   NSMutableArray *indexes = [NSMutableArray array];
   UITableViewRowAnimation tableViewRowAnimation = [RATreeView tableViewRowAnimationForTreeViewRowAnimation:animation];
   for (id item in items) {
-    NSIndexPath *indexPath = [self indexPathForItem:item];
+    NSIndexPath *indexPath = [self indexPathForItem:item section:section];
     [indexes addObject:indexPath];
   }
   

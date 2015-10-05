@@ -24,8 +24,8 @@
 
 @protocol RATreeNodeCollectionControllerDataSource <NSObject>
 
-- (NSInteger)treeNodeCollectionController:(RATreeNodeCollectionController *)controller numberOfChildrenForItem:(id)item;
-- (id)treeNodeCollectionController:(RATreeNodeCollectionController *)controller child:(NSInteger)childIndex ofItem:(id)item;
+- (NSInteger)treeNodeCollectionController:(RATreeNodeCollectionController *)controller numberOfChildrenForItem:(id)item section:(NSInteger)section;
+- (id)treeNodeCollectionController:(RATreeNodeCollectionController *)controller child:(NSInteger)childIndex ofItem:(id)item section:(NSInteger)section;
 
 @end
 
@@ -34,6 +34,10 @@
 
 @property (strong, nonatomic) id<RATreeNodeCollectionControllerDataSource> dataSource;
 @property (nonatomic, readonly) NSInteger numberOfVisibleRowsForItems;
+@property (assign, readonly) NSInteger section;
+
+- (instancetype)init __attribute__((unavailable("Must use -initWithSection: instead.")));
+- (instancetype)initWithSection:(NSInteger)section;
 
 - (RATreeNode *)treeNodeForIndex:(NSInteger)index;
 - (NSInteger)levelForItem:(id)item;
