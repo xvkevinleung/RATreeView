@@ -608,7 +608,8 @@ typedef enum RATreeViewRowAnimation {
 
 - (void)reloadData;
 - (void)reloadRowsForItems:(NSArray *)items section:(NSInteger)section withRowAnimation:(RATreeViewRowAnimation)animation;
-- (void)reloadRows;
+- (void)reloadSections:(NSIndexSet*)indexSet;
+- (void)reloadSections:(NSIndexSet*)indexSet withRowAnimation:(RATreeViewRowAnimation)animation;
 
 /////////////////////////////
 // UIScrollView Staff

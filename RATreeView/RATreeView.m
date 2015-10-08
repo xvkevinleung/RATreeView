@@ -553,12 +553,16 @@
   [self.tableView reloadRowsAtIndexPaths:indexes withRowAnimation:tableViewRowAnimation];
 }
 
-- (void)reloadRows
+- (void)reloadSections:(NSIndexSet*)indexSet
 {
-  NSIndexSet *indexSet = [NSIndexSet indexSetWithIndex:0];
-  [self.tableView reloadSections:indexSet withRowAnimation:UITableViewRowAnimationNone];
+  [self reloadSections:indexSet withRowAnimation:RATreeViewRowAnimationNone];
 }
 
+- (void)reloadSections:(NSIndexSet*)indexSet withRowAnimation:(RATreeViewRowAnimation)animation
+{
+  UITableViewRowAnimation tableViewRowAnimation = [RATreeView tableViewRowAnimationForTreeViewRowAnimation:animation];
+  [self.tableView reloadSections:indexSet withRowAnimation:tableViewRowAnimation];
+}
 
 #pragma mark - UIScrollView's properties
 
