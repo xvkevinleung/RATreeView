@@ -534,6 +534,7 @@
 
 - (void)reloadData
 {
+  [self.treeNodeCollectionControllers removeAllObjects];
   [self.tableView reloadData];
 }
 

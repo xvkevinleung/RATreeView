@@ -89,8 +89,15 @@
   [self updateNavigationItemButton];
 }
 
+- (void)refreshButtonTapped:(id)sender
+{
+  [self.treeView reloadData];
+}
+
 - (void)updateNavigationItemButton
 {
+  UIBarButtonItem* leftBarItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(refreshButtonTapped:)];
+  self.navigationItem.leftBarButtonItem = leftBarItem;
   UIBarButtonSystemItem systemItem = self.treeView.isEditing ? UIBarButtonSystemItemDone : UIBarButtonSystemItemEdit;
   self.editButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:systemItem target:self action:@selector(editButtonTapped:)];
   self.navigationItem.rightBarButtonItem = self.editButton;
