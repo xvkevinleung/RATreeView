@@ -534,10 +534,6 @@
 
 - (void)reloadData
 {
-  for (NSInteger section = 0; section < [self numberOfSections]; ++section) {
-    [self setupTreeStructure:section];
-  }
-
   [self.tableView reloadData];
 }
 
