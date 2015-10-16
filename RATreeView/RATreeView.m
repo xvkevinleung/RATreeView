@@ -544,9 +544,15 @@
   UITableViewRowAnimation tableViewRowAnimation = [RATreeView tableViewRowAnimationForTreeViewRowAnimation:animation];
   for (id item in items) {
     NSIndexPath *indexPath = [self indexPathForItem:item section:section];
-    [indexes addObject:indexPath];
+    if (indexPath) {
+      [indexes addObject:indexPath];
+    }
   }
-  
+
+  if (indexes.count == 0) {
+    return;
+  }
+
   [self.tableView reloadRowsAtIndexPaths:indexes withRowAnimation:tableViewRowAnimation];
 }
 

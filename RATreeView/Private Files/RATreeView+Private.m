@@ -57,6 +57,10 @@
 
 - (RATreeNode *)treeNodeForIndexPath:(NSIndexPath *)indexPath
 {
+  if (!indexPath) {
+    return nil;
+  }
+
   RATreeNodeCollectionController* treeNodeCollectionController = self.treeNodeCollectionControllers[indexPath.section];
   return [treeNodeCollectionController treeNodeForIndex:indexPath.row];
 }
