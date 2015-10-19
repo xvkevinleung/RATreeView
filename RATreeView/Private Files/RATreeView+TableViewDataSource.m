@@ -40,7 +40,7 @@
       [self setupTreeStructure:section];
     }
   }
-  return self.treeNodeCollectionControllers[section].numberOfVisibleRowsForItems;
+  return [self.treeNodeCollectionControllers[section] numberOfVisibleRowsForItems];
 }
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section

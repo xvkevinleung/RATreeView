@@ -26,7 +26,7 @@
 @interface RATreeView ()
 
 @property (nonatomic, strong) UITableView *tableView;
-@property (nonatomic, strong) NSMutableArray<RATreeNodeCollectionController*>* treeNodeCollectionControllers;
+@property (nonatomic, strong) NSMutableArray* treeNodeCollectionControllers;
 @property (nonatomic, strong) RABatchChanges *batchChanges;
 
 - (void)addTreeNodeCollectionControllersObject:(RATreeNodeCollectionController*)object;

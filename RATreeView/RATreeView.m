@@ -129,7 +129,7 @@
 #pragma mark Configure Class Extension
 @synthesize treeNodeCollectionControllers = _treeNodeCollectionControllers;
 
-- (NSArray<RATreeNodeCollectionController*>*)treeNodeCollectionControllers
+- (NSArray*)treeNodeCollectionControllers
 {
   return _treeNodeCollectionControllers;
 }
