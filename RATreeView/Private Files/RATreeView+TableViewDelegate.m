@@ -276,7 +276,7 @@
 {
   if ([self.delegate respondsToSelector:@selector(treeView:shouldHighlightRowForItem:)]) {
     RATreeNode *treeNode = [self treeNodeForIndexPath:indexPath];
-    return [self.delegate treeView:self shouldHighlightRowForItem:treeNode.item];
+    return [self.delegate treeView:self shouldHighlightRowForItem:treeNode.item section:indexPath.section];
   }
   return YES;
 }
@@ -285,7 +285,7 @@
 {
   if ([self.delegate respondsToSelector:@selector(treeView:didHighlightRowForItem:)]) {
     RATreeNode *treeNode = [self treeNodeForIndexPath:indexPath];
-    [self.delegate treeView:self didHighlightRowForItem:treeNode.item];
+    [self.delegate treeView:self didHighlightRowForItem:treeNode.item section:indexPath.section];
   }
 }
 
@@ -293,7 +293,7 @@
 {
   if ([self.delegate respondsToSelector:@selector(treeView:didUnhighlightRowForItem:)]) {
     RATreeNode *treeNode = [self treeNodeForIndexPath:indexPath];
-    [self.delegate treeView:self didUnhighlightRowForItem:treeNode.item];
+    [self.delegate treeView:self didUnhighlightRowForItem:treeNode.item section:indexPath.section];
   }
 }
 

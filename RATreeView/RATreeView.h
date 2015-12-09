@@ -437,7 +437,7 @@ typedef enum RATreeViewRowAnimation {
  *
  *  @return YES if the row should be highlighted or NO if it should not.
  */
-- (BOOL)treeView:(RATreeView *)treeView shouldHighlightRowForItem:(id)item;
+- (BOOL)treeView:(RATreeView *)treeView shouldHighlightRowForItem:(id)item section:(NSInteger)section;
 
 /**
  *  Tells the delegate that the row for a specified item was highlighted.
@@ -445,7 +445,7 @@ typedef enum RATreeViewRowAnimation {
  *  @param treeView     The tree-view object that highlighted the cell.
  *  @param item         An item identifying a row in tree view.
  */
-- (void)treeView:(RATreeView *)treeView didHighlightRowForItem:(id)item;
+- (void)treeView:(RATreeView *)treeView didHighlightRowForItem:(id)item section:(NSInteger)section;
 
 /**
  *  Tells the delegate that the highlight was removed from the row for a specified item.
@@ -453,7 +453,7 @@ typedef enum RATreeViewRowAnimation {
  *  @param treeView     The tree-view object that removed the highlight from the cell.
  *  @param item         An item identifying a row in tree view.
  */
-- (void)treeView:(RATreeView *)treeView didUnhighlightRowForItem:(id)item;
+- (void)treeView:(RATreeView *)treeView didUnhighlightRowForItem:(id)item section:(NSInteger)section;
 
 @end
 
