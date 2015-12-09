@@ -274,7 +274,7 @@
 
 - (BOOL)tableView:(UITableView *)tableView shouldHighlightRowAtIndexPath:(NSIndexPath *)indexPath
 {
-  if ([self.delegate respondsToSelector:@selector(treeView:shouldHighlightRowForItem:)]) {
+  if ([self.delegate respondsToSelector:@selector(treeView:shouldHighlightRowForItem:section:)]) {
     RATreeNode *treeNode = [self treeNodeForIndexPath:indexPath];
     return [self.delegate treeView:self shouldHighlightRowForItem:treeNode.item section:indexPath.section];
   }
@@ -283,7 +283,7 @@
 
 - (void)tableView:(UITableView *)tableView didHighlightRowAtIndexPath:(NSIndexPath *)indexPath
 {
-  if ([self.delegate respondsToSelector:@selector(treeView:didHighlightRowForItem:)]) {
+  if ([self.delegate respondsToSelector:@selector(treeView:didHighlightRowForItem:section:)]) {
     RATreeNode *treeNode = [self treeNodeForIndexPath:indexPath];
     [self.delegate treeView:self didHighlightRowForItem:treeNode.item section:indexPath.section];
   }
@@ -291,7 +291,7 @@
 
 - (void)tableView:(UITableView *)tableView didUnhighlightRowAtIndexPath:(NSIndexPath *)indexPath
 {
-  if ([self.delegate respondsToSelector:@selector(treeView:didUnhighlightRowForItem:)]) {
+  if ([self.delegate respondsToSelector:@selector(treeView:didUnhighlightRowForItem:section:)]) {
     RATreeNode *treeNode = [self treeNodeForIndexPath:indexPath];
     [self.delegate treeView:self didUnhighlightRowForItem:treeNode.item section:indexPath.section];
   }
